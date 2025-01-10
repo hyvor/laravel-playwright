@@ -28,7 +28,7 @@ jobs:
             tools: composer:v2
 
       -   name: Docker compose
-          run: docker-compose up -d
+          run: docker compose up -d
 
       -   name: Install dependencies
           run: composer update --ansi --no-progress
