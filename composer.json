@@ -1,6 +1,7 @@
 {
-    "name": "hyvor/laravel-e2e",
-    "description": "Helpers for Laravel E2E testing",
+    "name": "hyvor/laravel-playwright",
+    "description": "Laravel and Playwright E2E Testing",
+    "keywords": ["laravel", "playwright", "testing", "e2e"],
     "type": "library",
     "license": "MIT",
     "autoload": {
@@ -20,7 +21,7 @@
         }
     ],
     "require": {
-        "php": "^8.2 || ^8.3",
+        "php": ">=8.2",
         "doctrine/dbal": "^3.6"
     },
     "require-dev": {
