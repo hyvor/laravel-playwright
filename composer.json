@@ -25,9 +25,9 @@
     },
     "require-dev": {
         "orchestra/testbench": "^9.0",
-        "pestphp/pest": "^2.6",
         "phpstan/phpstan": "^2.0",
-        "larastan/larastan": "^3.0"
+        "larastan/larastan": "^3.0",
+        "phpunit/phpunit": "^10.5"
     },
     "extra": {
         "laravel": {

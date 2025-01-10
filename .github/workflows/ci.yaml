@@ -11,21 +11,9 @@ jobs:
     name: "Tests on PHP ${{ matrix.php }}${{ matrix.name_suffix }}"
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_USER: user
-          MYSQL_PASSWORD: secret
-          MYSQL_DATABASE: test
-          MYSQL_ROOT_PASSWORD: secretroot
-        ports:
-          - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     strategy:
       matrix:
-        php: [ '8.2', '8.3' ]
+        php: [ '8.2', '8.3', '8.4' ]
 
     steps:
       -   name: Checkout
@@ -39,17 +27,14 @@ jobs:
             ini-file: development
             tools: composer:v2
 
+      -   name: Docker compose
+          run: docker-compose up -d
+
       -   name: Install dependencies
           run: composer update --ansi --no-progress
 
       -   name: Run tests
-          run: vendor/bin/pest
-          env:
-            DB_HOST: 127.0.0.1
-            DB_DATABASE: test
-            DB_USERNAME: user
-            DB_PASSWORD: secret
-            DB_PORT: ${{ job.services.mysql.ports[3306] }}
+          run: vendor/bin/phpunit
 
   static_analysis:
     name: Static analysis
