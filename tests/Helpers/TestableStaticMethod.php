@@ -1,8 +1,8 @@
 <?php
 
-namespace Hyvor\LaravelE2E\Tests\Helpers;
+namespace Hyvor\LaravelPlaywright\Tests\Helpers;
 
-class StaticMethodTest
+class TestableStaticMethod
 {
 
     public static function ping() : string

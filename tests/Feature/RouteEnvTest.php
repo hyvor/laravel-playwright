@@ -1,32 +1,41 @@
 <?php
 
-use Hyvor\LaravelE2E\ServiceProvider;
+namespace Hyvor\LaravelPlaywright\Tests\Feature;
+
+use Hyvor\LaravelPlaywright\ServiceProvider;
+use Hyvor\LaravelPlaywright\Tests\TestCase;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Route;
 
-it('does not add routes for production', function() {
+class RouteEnvTest extends TestCase
+{
 
-    $this->post('_testing/truncate')->assertOk();
+    public function testDoesNotAddRoutesForProduction(): void
+    {
+        $this->post('playwright/truncate')->assertOk();
 
-    $this->app->detectEnvironment(fn() => 'production');
-    $this->app->register(ServiceProvider::class, true);
+        assert($this->app !== null);
 
-    $this->app['env'] = 'production';
-    Route::setRoutes(new RouteCollection());
-    (new ServiceProvider($this->app))->boot();
+        $this->app->detectEnvironment(fn() => 'production');
+        $this->app->register(ServiceProvider::class, true);
+        $this->app['env'] = 'production'; // @phpstan-ignore-line
 
-    $this->post('_testing/artisan')->assertNotFound();
+        Route::setRoutes(new RouteCollection());
+        (new ServiceProvider($this->app))->boot();
+        $this->post('playwright/artisan')->assertNotFound();
+    }
 
-});
+    public function testSupportsCustomPrefix(): void
+    {
+        config(['app.e2e.prefix' => 'api/e2e']);
 
-it('supports custom prefix', function() {
+        assert($this->app !== null);
 
-    config(['app.e2e.prefix' => 'api/e2e']);
+        Route::setRoutes(new RouteCollection());
+        (new ServiceProvider($this->app))->boot();
 
-    Route::setRoutes(new RouteCollection());
-    (new ServiceProvider($this->app))->boot();
+        $this->post('playwright/truncate')->assertNotFound();
+        $this->post('api/e2e/truncate')->assertOk();
+    }
 
-    $this->post('_testing/truncate')->assertNotFound();
-    $this->post('api/e2e/truncate')->assertOk();
-
-});
+}

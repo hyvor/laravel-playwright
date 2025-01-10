@@ -1,20 +1,29 @@
 <?php
 
-namespace Hyvor\LaravelE2E\Tests\Helpers;
+namespace Hyvor\LaravelPlaywright\Tests\Helpers;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $created_at
+ * @property string $updated_at
+ */
 class UserModel extends Model
 {
 
+    /**
+     * @use HasFactory<UserFactory>
+     */
     use HasFactory;
 
     protected $table = 'users';
 
-    protected static function newFactory()
+    public static function newFactory(): UserFactory
     {
-        return UserFactory::new();
+        return new UserFactory();
     }
 
 }

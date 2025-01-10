@@ -1,9 +1,12 @@
 <?php
 
-namespace Hyvor\LaravelE2E\Tests\Helpers;
+namespace Hyvor\LaravelPlaywright\Tests\Helpers;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<UserModel>
+ */
 class UserFactory extends Factory
 {
 

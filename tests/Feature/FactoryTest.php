@@ -1,31 +1,41 @@
 <?php
 
-use Hyvor\LaravelE2E\Tests\Helpers\UserModel;
+namespace Hyvor\LaravelPlaywright\Tests\Feature;
 
-it('creates a model factory', function() {
+use Hyvor\LaravelPlaywright\Tests\Helpers\UserModel;
+use Hyvor\LaravelPlaywright\Tests\TestCase;
 
-    $this->postJson('_testing/factory', [
-        'model' => '\Hyvor\LaravelE2E\Tests\Helpers\UserModel',
-        'attrs' => [
-            'name' => 'John Doe',
-        ]
-    ])
-        ->assertOk()
-        ->assertJsonPath('name', 'John Doe');
+class FactoryTest extends TestCase
+{
 
-    expect(UserModel::count())->toBe(1);
+    public function testCreatesModelFromFactory(): void
+    {
 
-});
+        $this->postJson('playwright/factory', [
+            'model' => '\Hyvor\LaravelPlaywright\Tests\Helpers\UserModel',
+            'attrs' => [
+                'name' => 'John Doe',
+            ]
+        ])
+            ->assertOk()
+            ->assertJsonPath('name', 'John Doe');
 
-it('creates models with count', function() {
+        $this->assertEquals(1, UserModel::count());
 
-    $this->postJson('_testing/factory', [
-        'model' => '\Hyvor\LaravelE2E\Tests\Helpers\UserModel',
-        'count' => 3
-    ])
-        ->assertOk()
-        ->assertJsonCount(3);
+    }
 
-    expect(UserModel::count())->toBe(3);
+    public function testCreatesModelFromFactoryWithCount(): void
+    {
 
-});
+        $this->postJson('playwright/factory', [
+            'model' => '\Hyvor\LaravelPlaywright\Tests\Helpers\UserModel',
+            'count' => 3
+        ])
+            ->assertOk()
+            ->assertJsonCount(3);
+
+        $this->assertEquals(3, UserModel::count());
+
+    }
+
+}

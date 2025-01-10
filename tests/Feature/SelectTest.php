@@ -1,15 +1,21 @@
 <?php
 
-use Hyvor\LaravelE2E\Tests\Helpers\UserModel;
+namespace Hyvor\LaravelPlaywright\Tests\Feature;
 
-it('selects a user', function() {
+use Hyvor\LaravelPlaywright\Tests\Helpers\UserModel;
+use Hyvor\LaravelPlaywright\Tests\TestCase;
 
-    $user = UserModel::factory()->create();
+class SelectTest extends TestCase
+{
+    public function testSelectsAUser(): void
+    {
+        $user = UserModel::factory()->create();
 
-    $this->postJson('/_testing/select', [
-        'query' => 'select * from users where id = ' . $user->id
-    ])
-        ->assertOk()
-        ->assertJsonPath('0.id', $user->id);
+        $response = $this->postJson('/playwright/select', [
+            'query' => 'select * from users where id = ' . $user->id
+        ]);
 
-});
+        $response->assertOk();
+        $response->assertJsonPath('0.id', $user->id);
+    }
+}

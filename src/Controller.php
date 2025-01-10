@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Hyvor\LaravelE2E;
+namespace Hyvor\LaravelPlaywright;
 
+use Carbon\Carbon;
+use Hyvor\LaravelPlaywright\Services\DynamicConfig;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -31,12 +33,13 @@ class Controller
     public function truncate(Request $request) : JsonResponse
     {
 
-        $data = $request->validate([
+        $request->validate([
             'connections' => 'nullable|array',
             'connections.*' => 'nullable|string'
         ]);
 
-        $connections = $data['connections'] ?? [null];
+        /** @var array<string|null> $connections */
+        $connections = $request->input('connections') ?? [null];
 
         $truncate = new Services\Truncate();
         $truncate->truncate($connections);
@@ -48,8 +51,15 @@ class Controller
     public function factory(Request $request) : JsonResponse
     {
 
+        $request->validate([
+            'model' => 'string|required',
+            'count' => 'nullable|integer',
+            'attrs' => 'array',
+        ]);
+
         $modelClass = (string) $request->string('model');
         $count = $request->has('count') ? $request->integer('count') : null;
+        /** @var array<string, mixed> $attrs */
         $attrs = (array) $request->input('attrs');
 
         if (!class_exists($modelClass)) {
@@ -86,26 +96,49 @@ class Controller
     public function query(Request $request) : JsonResponse
     {
 
+        $request->validate([
+            'connection' => 'nullable|string',
+            'query' => 'string|required',
+            'bindings' => 'array',
+            'unprepared' => 'boolean'
+        ]);
+
         $connection = $request->has('connection') ?
             (string) $request->string('connection') :
             null;
         $query = (string) $request->string('query');
+        /** @var array<mixed> $bindings */
+        $bindings = $request->input('bindings', []);
+        $unprepared = $request->boolean('unprepared');
 
-        $results = DB::connection($connection)->statement($query);
+        $connection = DB::connection($connection);
+        $success = $unprepared ?
+            $connection->unprepared($query) :
+            $connection->statement($query, $bindings);
 
-        return Response::json($results);
+        return Response::json([
+            'success' => $success
+        ]);
 
     }
 
     public function select(Request $request) : JsonResponse
     {
 
+        $request->validate([
+            'connection' => 'nullable|string',
+            'query' => 'string|required',
+            'bindings' => 'array',
+        ]);
+
         $connection = $request->has('connection') ?
             (string) $request->string('connection') :
             null;
         $query = (string) $request->string('query');
+        /** @var array<mixed> $bindings */
+        $bindings = $request->input('bindings', []);
 
-        $results = DB::connection($connection)->select($query);
+        $results = DB::connection($connection)->select($query, $bindings);
 
         return Response::json($results);
 
@@ -114,13 +147,14 @@ class Controller
     public function function(Request  $request) : JsonResponse
     {
 
-        $data = $request->validate([
+        $request->validate([
             'function' => 'string|required',
             'args' => 'array'
         ]);
 
-        $function = $data['function'];
-        $args = $data['args'] ?? [];
+        $function = (string) $request->string('function');
+        /** @var array<mixed> $args */
+        $args = $request->input('args', []);
 
         if (!is_callable($function))
             abort(422, 'Function does not exist');
@@ -129,5 +163,50 @@ class Controller
         return Response::json($response);
 
     }
+
+    public function dynamicConfig(Request $request) : JsonResponse
+    {
+
+        $request->validate([
+            'key' => 'string|required',
+            'value' => 'required',
+        ]);
+
+        $key = (string) $request->string('key');
+        $value = $request->input('value');
+
+        DynamicConfig::set($key, $value);
+
+        return Response::json();
+    }
+
+    public function travel(Request $request, DynamicConfig $dynamicConfig) : JsonResponse
+    {
+
+        $request->validate([
+            'to' => 'string|required',
+        ]);
+
+        $to = (string) $request->string('to');
+
+        try {
+            Carbon::parse($to);
+        } catch (\Exception $e) {
+            abort(422, 'Invalid date');
+        }
+
+        DynamicConfig::set(DynamicConfig::KEY_TRAVEL, $to);
+
+        return Response::json();
+
+    }
+
+    public function tearDown(DynamicConfig $dynamicConfig) : JsonResponse
+    {
+        $dynamicConfig->delete();
+
+        return Response::json();
+    }
+
 
 }

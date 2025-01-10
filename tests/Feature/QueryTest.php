@@ -1,17 +1,24 @@
 <?php
 
-use Hyvor\LaravelE2E\Tests\Helpers\UserModel;
+namespace Hyvor\LaravelPlaywright\Tests\Feature;
 
-it('runs a query', function() {
+use Hyvor\LaravelPlaywright\Tests\Helpers\UserModel;
+use Hyvor\LaravelPlaywright\Tests\TestCase;
 
-    $users = UserModel::factory()
-        ->count(3)
-        ->create();
+class QueryTest extends TestCase
+{
 
-    $this->postJson('/_testing/query', [
-        'query' => 'update users set name = "John Doe" where id = ' . $users[0]->id
-    ])->assertOk();
+    public function testRunsAQuery() : void
+    {
+        $users = UserModel::factory()
+            ->count(3)
+            ->create();
 
-    expect($users[0]->refresh()->name)->toBe('John Doe');
+        $this->postJson('/playwright/query', [
+            'query' => "update users set name = 'John Doe' where id = " . $users[0]?->id
+        ])->assertOk();
 
-});
+        $this->assertEquals('John Doe', $users[0]?->refresh()->name);
+    }
+
+}

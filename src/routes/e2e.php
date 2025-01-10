@@ -1,26 +1,21 @@
 <?php
 
-use Illuminate\Config\Repository;
-use Illuminate\Support\Facades\App;
+use Hyvor\LaravelPlaywright\Services\Config;
 use Illuminate\Support\Facades\Route;
-use Hyvor\LaravelE2E\Controller;
+use Hyvor\LaravelPlaywright\Controller;
 
-if (App::environment('local', 'testing')) {
 
-    /** @var Repository  $config */
-    $config = config();
-    /** @var string $prefix */
-    $prefix = $config->get('app.e2e.prefix', '_testing');
+Route::prefix(Config::prefix())->group(function () {
 
-    Route::prefix($prefix)->group(function () {
+    Route::post('artisan', [Controller::class, 'artisan']);
+    Route::post('truncate', [Controller::class, 'truncate']);
+    Route::post('factory', [Controller::class, 'factory']);
+    Route::post('query', [Controller::class, 'query']);
+    Route::post('select', [Controller::class, 'select']);
+    Route::post('function', [Controller::class, 'function']);
+    Route::post('dynamicConfig', [Controller::class, 'dynamicConfig']);
+    Route::post('travel', [Controller::class, 'travel']);
 
-        Route::post('artisan', [Controller::class, 'artisan']);
-        Route::post('truncate', [Controller::class, 'truncate']);
-        Route::post('factory', [Controller::class, 'factory']);
-        Route::post('query', [Controller::class, 'query']);
-        Route::post('select', [Controller::class, 'select']);
-        Route::post('function', [Controller::class, 'function']);
+    Route::post('tearDown', [Controller::class, 'tearDown']);
 
-    });
-
-}
+});

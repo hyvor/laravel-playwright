@@ -1,14 +1,19 @@
 <?php
 
-use Hyvor\LaravelE2E\Tests\Helpers\UserModel;
+namespace Hyvor\LaravelPlaywright\Tests\Feature;
 
-it('truncates', function() {
+use Hyvor\LaravelPlaywright\Tests\Helpers\UserModel;
+use Hyvor\LaravelPlaywright\Tests\TestCase;
 
-    UserModel::factory()->count(3)->create();
-    expect(UserModel::count())->toBe(3);
+class TruncateTest extends TestCase
+{
+    public function testTruncates(): void
+    {
+        UserModel::factory()->count(3)->create();
+        $this->assertCount(3, UserModel::all());
 
-    $this->post('_testing/truncate')->assertOk();
+        $this->postJson('/playwright/truncate');
 
-    expect(UserModel::count())->toBe(0);
-
-});
+        $this->assertCount(0, UserModel::all());
+    }
+}
