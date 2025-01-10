@@ -58,7 +58,7 @@ class FunctionTest extends TestCase
     public function testCallsAStaticMethodWithNamespace() : void
     {
         $this->postJson('/playwright/function', [
-            'function' => 'Hyvor\LaravelPlaywright\Tests\Helpers\StaticMethodTest::ping',
+            'function' => 'Hyvor\LaravelPlaywright\Tests\Helpers\TestableStaticMethod::ping',
         ])
             ->assertOk()
             ->assertSee('pong');
