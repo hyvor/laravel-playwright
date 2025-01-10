@@ -1,9 +1,10 @@
 <?php
 
-namespace Hyvor\LaravelE2E\Tests;
+namespace Hyvor\LaravelPlaywright\Tests;
 
-use Hyvor\LaravelE2E\ServiceProvider;
-use Hyvor\LaravelE2E\Tests\Helpers\Migrations;
+use Hyvor\LaravelPlaywright\ServiceProvider;
+use Hyvor\LaravelPlaywright\Services\DynamicConfig;
+use Hyvor\LaravelPlaywright\Tests\Helpers\Migrations;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -13,6 +14,14 @@ class TestCase extends \Orchestra\Testbench\TestCase
         parent::setUp();
 
         Migrations::run();
+    }
+
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        DynamicConfig::delete();
     }
 
     protected function getPackageProviders($app)

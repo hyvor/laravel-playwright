@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Hyvor\LaravelE2E\Services;
+namespace Hyvor\LaravelPlaywright\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +23,7 @@ class Truncate
     private function truncateTablesOfConnection(?string $connection) : void
     {
 
+        /** @var string[] $tables */
         $tables = Schema::connection($connection)->getTableListing();
         Schema::disableForeignKeyConstraints();
 

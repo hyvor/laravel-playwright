@@ -1,6 +1,6 @@
 <?php
 
-namespace Hyvor\LaravelE2E\Tests\Helpers;
+namespace Hyvor\LaravelPlaywright\Tests\Helpers;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -12,14 +12,14 @@ class Migrations
     public static function run(): void
     {
 
-        DB::statement('DROP TABLE IF EXISTS users');
+        DB::statement('drop table if exists users');
 
         DB::statement('
-            CREATE TABLE users (
-                id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                name varchar(255) DEFAULT NULL,
-                created_at timestamp NULL DEFAULT NULL,
-                updated_at timestamp NULL DEFAULT NULL
+            create table users (
+                id bigserial,
+                name varchar(255),
+                created_at timestamp,
+                updated_at timestamp
             )
         ');
 

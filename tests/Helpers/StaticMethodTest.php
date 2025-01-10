@@ -1,6 +1,6 @@
 <?php
 
-namespace Hyvor\LaravelE2E\Tests\Helpers;
+namespace Hyvor\LaravelPlaywright\Tests\Helpers;
 
 class StaticMethodTest
 {

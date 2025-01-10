@@ -1,15 +1,15 @@
-# Laravel E2E Helpers
+# Laravel Playwright
 
-This package is a collection of helpers routes for Laravel E2E testing with frameworks like [Playwright](https://playwright.dev/).
+This package contains a Laravel library and a Typescript library to help you write E2E tests for your Laravel application using [Playwright](https://playwright.dev/).
 
 It adds the following endpoints to your application in `local` and `testing` environments:
 
-* `POST /_testing/artisan` - Run an artisan command
-* `POST /_testing/truncate` - Truncate all tables
-* `POST /_testing/factory` - Create a model using factories
-* `POST /_testing/query` - Run a database query
-* `POST /_testing/select` - Run a database select query
-* `POST /_testing/function` - Call a PHP function (or static class method)
+* `POST /playwright/artisan` - Run an artisan command
+* `POST /playwright/truncate` - Truncate all tables
+* `POST /playwright/factory` - Create a model using factories
+* `POST /playwright/query` - Run a database query
+* `POST /playwright/select` - Run a database select query
+* `POST /playwright/function` - Call a PHP function (or static class method)
 
 ## Installation
 
@@ -19,12 +19,34 @@ You can install the package via composer:
 composer require --dev hyvor/laravel-e2e
 ```
 
+## Configuration
+
+You can configure the package by adding an `e2e` key to your `config/app.php` file. The following options are available (default values are shown):
+
+```php
+return [
+    // ...
+
+    'e2e' => [
+        /**
+        * The prefix for the testing endpoints
+        */
+        'prefix' => 'playwright',
+        
+        /**
+        * The environments in which the testing endpoints are enabled
+        */
+        'environments' => ['local', 'testing'],
+    ],
+];
+```
+
 ## Usage
 
 ### Example Usage with Javascript
 
 ```js
-fetch('/_testing/artisan', {
+fetch('/playwright/artisan', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
@@ -35,7 +57,7 @@ fetch('/_testing/artisan', {
 
 ### Run artisan commands
 
-`POST _testing/artisan` endpoint allows you to run artisan commands from your tests. For example, you can run `php artisan migrate:fresh` before each test. It accepts two parameters:
+`POST playwright/artisan` endpoint allows you to run artisan commands from your tests. For example, you can run `php artisan migrate:fresh` before each test. It accepts two parameters:
 
 - `command` - The artisan command to run
 - `parameters` - The parameters to pass to the command (array/object, optional)
@@ -58,7 +80,7 @@ This endpoint returns the exit code and the output of the command in JSON format
 
 ### Truncate all tables
 
-Truncating tables is faster than running `migrate:fresh` command in small sized databases. You can use `POST /_testing/truncate` endpoint to truncate all tables. It accepts an optional `connections` parameter to truncate tables in specific connections. If the `connections` parameter is not set, it truncates tables in the default connection.
+Truncating tables is faster than running `migrate:fresh` command in small sized databases. You can use `POST /playwright/truncate` endpoint to truncate all tables. It accepts an optional `connections` parameter to truncate tables in specific connections. If the `connections` parameter is not set, it truncates tables in the default connection.
 
 ```jsonc
 {
@@ -68,7 +90,7 @@ Truncating tables is faster than running `migrate:fresh` command in small sized 
 
 ### Create a model using factories
 
-You can use `POST /_testing/factory` endpoint to create a model using factories. It accepts the following parameters:
+You can use `POST /playwright/factory` endpoint to create a model using factories. It accepts the following parameters:
 
 - `model` - The model class name (if the model class name starts with `App\Models\`, you can omit it)
 - `count` - The number of models to create (optional, default: 1). If count is set (even if it's 1), it returns an array of models. Otherwise, it returns a single model.
@@ -96,7 +118,7 @@ The following example creates 5 `App\Database\Models\User` models and returns th
 
 ### Run a database query
 
-You can use `POST /_testing/query` endpoint to run a database query. It accepts the following parameters:
+You can use `POST /playwright/query` endpoint to run a database query. It accepts the following parameters:
 
 - `query` - The query to run
 - `connection` - The database connection to use (optional)
@@ -110,7 +132,7 @@ You can use `POST /_testing/query` endpoint to run a database query. It accepts 
 
 ### Run a database select query
 
-You can use `POST /_testing/select` endpoint to run a database select query. It accepts the following parameters:
+You can use `POST /playwright/select` endpoint to run a database select query. It accepts the following parameters:
 
 - `query` - The query to run
 - `connection` - The database connection to use (optional)
@@ -126,7 +148,7 @@ It returns the result as an array of objects in JSON format.
 
 ### Call a PHP function or static class method
 
-Use the `POST /_testing/function` endpoint to call a PHP function or a static class method. It accepts the following parameters:
+Use the `POST /playwright/function` endpoint to call a PHP function or a static class method. It accepts the following parameters:
 
 - `function` - Function name to call
 - `args` - Array of arguments to send to the function

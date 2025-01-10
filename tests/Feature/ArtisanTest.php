@@ -1,14 +1,25 @@
 <?php
 
-it('runs a artisan command', function() {
+namespace Hyvor\LaravelPlaywright\Tests\Feature;
 
-    $json = $this->post('_testing/artisan', [
-        'command' => 'route:list'
-    ])
-        ->assertOk()
-        ->json();
+use Hyvor\LaravelPlaywright\Tests\TestCase;
 
-    expect($json['code'])->toBe(0);
-    expect($json['output'])->toContain('_testing/artisan');
+class ArtisanTest extends TestCase
+{
 
-});
+    public function testRunsArtisanCommand(): void
+    {
+
+        /** @var array<string|int> $json */
+        $json = $this->post('playwright/artisan', [
+            'command' => 'route:list'
+        ])
+            ->assertOk()
+            ->json();
+
+        $this->assertEquals(0, $json['code']);
+        $this->assertStringContainsString('playwright/artisan', (string) $json['output']);
+
+    }
+
+}

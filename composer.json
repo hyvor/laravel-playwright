@@ -5,12 +5,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Hyvor\\LaravelE2E\\": "src/"
+            "Hyvor\\LaravelPlaywright\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Hyvor\\LaravelE2E\\Tests\\": "tests/"
+            "Hyvor\\LaravelPlaywright\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -26,12 +26,13 @@
     "require-dev": {
         "orchestra/testbench": "^9.0",
         "pestphp/pest": "^2.6",
-        "phpstan/phpstan": "^1.10"
+        "phpstan/phpstan": "^2.0",
+        "larastan/larastan": "^3.0"
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Hyvor\\LaravelE2E\\ServiceProvider"
+                "Hyvor\\LaravelPlaywright\\ServiceProvider"
             ]
         }
     },
