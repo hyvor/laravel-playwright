@@ -71,8 +71,10 @@ jobs:
             node-version: '16'
 
       -   name: Install dependencies
+          working-directory: playwright
           run: npm install
 
       -   name: Run TypeScript
+          working-directory: playwright
           # build to check for errors
           run: npm run build

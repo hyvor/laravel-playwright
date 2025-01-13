@@ -1,0 +1,26 @@
+name: Publish to NPM
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+jobs:
+  publish:
+    name: 'Publish ${{ github.ref_name }}'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.HYVOR_ORG_NPM_TOKEN }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          npm ci
+          npm run package
+          npm version $VERSION --no-git-tag-version
+          npm publish --access public
