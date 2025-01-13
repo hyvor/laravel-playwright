@@ -1,20 +1,32 @@
 # Laravel Playwright
 
-This repository contains a Laravel library and a Typescript library to help you write E2E tests for your Laravel application using [Playwright](https://playwright.dev/). It provides a set of endpoints to interact with your Laravel application from your Playwright tests. For example, you can run artisan commands, create models using factories, run database queries, and call PHP functions from your Playwright tests.
+This repository contains a Laravel and a Playwright library to help you write E2E tests for your Laravel application using [Playwright](https://playwright.dev/). It adds a set of endpoints to your Laravel application to allow Playwright to interact with it. You can do the following from your Playwright tests:
 
-## Laravel
+- Run artisan commands
+- Create models using factories
+- Run database queries
+- Run PHP functions
+- Update Laravel config while a test is running (until the test ends and calls `tearDown`).
+- Registering a boot function to run on each Laravel request. You can use this feature to mock a service dependency, for example.
+- Traveling to a specific time in the application during the test
 
-### Installation
+## Installation
 
-You can install the Laravel package via composer:
+On Laravel side, install the package via composer:
 
 ```bash
 composer require --dev hyvor/laravel-playwright
 ```
 
-### Configuration
+On Playwright side, install the package via npm:
 
-You can configure the package by adding an `e2e` key to your `config/app.php` file. The following options are available (default values are shown):
+```bash
+npm install @hyvor/laravel-playwright
+```
+
+## Laravel Config
+
+You can configure the routes by adding an `e2e` key to your `config/app.php` file. The following options are available (default values are shown):
 
 ```php
 return [
@@ -29,158 +41,164 @@ return [
         
         /**
         * The environments in which the testing endpoints are enabled
+        * CAUTION: Enabling the testing endpoints in production can be a critical security issue
         */
         'environments' => ['local', 'testing'],
     ],
 ];
 ```
 
-## Playwright
+## Playwright Config
 
-## Usage
+Set `use.laravelBaseUrl` in your `playwright.config.ts` file to the base URL of your testing endpoints. This is the URL of your application + the `prefix` you set in Laravel config.
 
-### Example Usage with Javascript
-
-```js
-fetch('/playwright/artisan', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
+```ts
+export default defineConfig({
+    // ...other
+    use: {
+        laravelBaseUrl: 'http://localhost/playwright',
     },
-    body: JSON.stringify(INPUT_DATA),
-})
+});
 ```
 
-### Run artisan commands
+If you use Typescript, include the `LaravelOptions` type in the `defineConfig` function.
 
-`POST playwright/artisan` endpoint allows you to run artisan commands from your tests. For example, you can run `php artisan migrate:fresh` before each test. It accepts two parameters:
+```ts
+import type { LaravelOptions } from '@hyvor/laravel-playwright';
 
-- `command` - The artisan command to run
-- `parameters` - The parameters to pass to the command (array/object, optional)
-
-```json
-{
-    "command": "migrate:fresh",
-    "parameters": ["--seed"]
-}
+export default defineConfig<LaravelOptions>({
+    use: {
+        laravelBaseUrl: 'http://localhost/playwright',
+    },
+});
 ```
 
-This endpoint returns the exit code and the output of the command in JSON format:
+## Setting up tests
 
-```json
-{
-    "code": 0,
-    "output": ""
-}
+In your Playwright tests, swap the `test` import from `@playwright/test` to `@hyvor/laravel-playwright`.
+
+```diff
+- import { test } from '@playwright/test';
++ import { test } from '@hyvor/laravel-playwright';
+
+test('example', async ({ laravel }) => {
+    laravel.artisan('migrate:fresh');
+});
+``` 
+
+> **Note**: In practise, it is not recommended to import from `@hyvor/laravel-playwright` directly on every test file, if you have many. Instead, create your own [test fixture](https://playwright.dev/docs/test-fixtures) extending `test` from `@hyvor/laravel-playwright` and import that fixture in your tests.
+
+## Basic Usage
+
+```ts
+import { test } from '@hyvor/laravel-playwright';
+
+test('example', async ({ laravel }) => {
+
+    // RUN ARTISAN COMMANDS
+    // ====================
+    const output = await laravel.artisan('migrate:fresh');
+    // output.code: number - The exit code of the command
+    // output.output: string - The output of the command
+    // with parameters
+    await larael.artisan('db:seed', ['--class', 'DatabaseSeeder']);
+    
+    
+    // TRUNCATE TABLES
+    // ===============
+    await laravel.truncate();
+    // in specific DB connections
+    await laravel.truncate(['connection1', 'connection2']);
+    
+    
+    // CREATE MODELS FROM FACTORIES
+    // ============================
+    // Create a App\Models\User model
+    // user will be an object of the model
+    const user = await laravel.factory('User');
+    // Create a App\Models\User model with attributes
+    await laravel.factory('User', { name: 'John Doe' });
+    // Create 5 App\Models\User models
+    // users will be an array of the models
+    const users = await laravel.factory('User', {}, 5);
+    // Create a CustomModel model
+    await laravel.factory('CustomModel');
+    
+    
+    // RUN A DATABASE QUERY
+    // ====================
+    // Run a query
+    await laravel.query('DELETE FROM users');
+    // Run a query with bindings
+    await laravel.query('DELETE FROM users WHERE id = ?', [1]);
+    // Run a query on a specific connection
+    await laravel.query('DELETE FROM users', [], { connection: 'connection1' });
+    // Run a unprepared statement
+    await laravel.query(`
+        DROP SCHEMA public CASCADE;
+        CREATE SCHEMA public;
+        GRANT ALL ON SCHEMA public TO public;
+    `, [], { unprepared: true });
+    
+    
+    // RUN A SELECT QUERY
+    // ==================
+    // Run a select query
+    // Returns an array of objects
+    const blogs = await laravel.select('SELECT * FROM blogs');
+    // Run a select query with bindings
+    await laravel.select('SELECT * FROM blogs WHERE id = ?', [1]);
+    // Run a select query on a specific connection
+    await laravel.select('SELECT * FROM blogs', [], { connection: 'connection1' });
+    
+    
+    // RUN A PHP FUNCTION
+    // ==================
+    // Run a PHP function
+    // Returns the output of the function
+    // Output is JSON encoded in Laravel and decoded in Playwright
+    // The following examples call this function:
+    // function sayHello($name) { return "Hello, $name!"; }
+    const funcOutput = await laravel.callFunction('sayHello');
+    // Run a PHP function with parameters
+    await laravel.callFunction('sayHello', ['John']);
+    // Run a PHP function with named parameters
+    await laravel.callFunction('sayHello', { name: 'John' });
+    // Run a static class method
+    await laravel.callFunction("App\\MyAwesomeClass::method");
+    
+});
+
+
 ```
 
-### Truncate all tables
+## Dynamic Configuration
 
-Truncating tables is faster than running `migrate:fresh` command in small sized databases. You can use `POST /playwright/truncate` endpoint to truncate all tables. It accepts an optional `connections` parameter to truncate tables in specific connections. If the `connections` parameter is not set, it truncates tables in the default connection.
+You can update Laravel config for **ALL** subsequent requests until the test ends.
 
-```jsonc
-{
-    "connections": [] // optional
-}
-```
+```ts
+import { test } from '@hyvor/laravel-playwright';
 
-### Create a model using factories
+test('example', async ({ laravel }) => {
 
-You can use `POST /playwright/factory` endpoint to create a model using factories. It accepts the following parameters:
+    // SET DYNAMIC CONFIG
+    // ==================
+    // Update a config value
+    // This value will be used in all subsequent requests sent to Laravel
+    // until the test ends and calls `tearDown` (which is done automatically)
+    await laravel.config('app.timezone', 'Europe/Paris');
+    
+    // TRAVEL TO A TIME
+    // =================
+    // Travel to a specific time in the application
+    // This is similar to Laravel's `travelTo` method
+    await laravel.travel('2022-01-01 12:00:00');
+    
+    // REGISTER A BOOT FUNCTION
+    // ========================
+    // Register a function to run while Laravel is booting
+    // This is useful to mock a service dependency, for example
+    await laravel.registerBootFunction('App\\E2EHelper::swapPaymentService');
 
-- `model` - The model class name (if the model class name starts with `App\Models\`, you can omit it)
-- `count` - The number of models to create (optional, default: 1). If count is set (even if it's 1), it returns an array of models. Otherwise, it returns a single model.
-- `attributes` - The attributes to set (optional)
-
-The following example creates a single `App\Models\User` model with the `name` attribute set to `John Doe`, and returns it in JSON format:
-
-```json
-{
-    "model": "User",
-    "attributes": {
-        "name": "John Doe"
-    }
-}
-```
-
-The following example creates 5 `App\Database\Models\User` models and returns them as an array in JSON format:
-
-```json
-{
-    "model": "App\\Database\\Models\\User",
-    "count": 5
-}
-```
-
-### Run a database query
-
-You can use `POST /playwright/query` endpoint to run a database query. It accepts the following parameters:
-
-- `query` - The query to run
-- `connection` - The database connection to use (optional)
-
-```json
-{
-    "query": "UPDATE users SET name = 'John Doe' WHERE id = 1",
-    "connection": "mysql"
-}
-```
-
-### Run a database select query
-
-You can use `POST /playwright/select` endpoint to run a database select query. It accepts the following parameters:
-
-- `query` - The query to run
-- `connection` - The database connection to use (optional)
-
-It returns the result as an array of objects in JSON format.
-
-```json
-{
-    "query": "SELECT * FROM users WHERE id = 1",
-    "connection": "mysql"
-}
-```
-
-### Call a PHP function or static class method
-
-Use the `POST /playwright/function` endpoint to call a PHP function or a static class method. It accepts the following parameters:
-
-- `function` - Function name to call
-- `args` - Array of arguments to send to the function
-
-Function's return value will be returned (JSON-encoded) from this endpoint.
-
-Examples:
-
-Arguments as an array:
-
-```json
-{
-    "function": "fullName",
-    "args": ["Supun", "Wimalasena"]
-}
-```
-
-This calls a function named `fullName` with two arguments.
-
-Named arguments:
-
-```json
-{
-    "function": "fullName",
-    "args": {
-        "first": "Supun",
-        "last": "Wimalasena"
-    }
-}
-```
-
-Static methods:
-
-```json
-{
-    "function": "namespace\\class::method",
-    "args": []
-}
+});
 ```

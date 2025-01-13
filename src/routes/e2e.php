@@ -15,6 +15,7 @@ Route::prefix(Config::prefix())->group(function () {
     Route::post('function', [Controller::class, 'function']);
     Route::post('dynamicConfig', [Controller::class, 'dynamicConfig']);
     Route::post('travel', [Controller::class, 'travel']);
+    Route::post('registerBootFunction', [Controller::class, 'registerBootFunction']);
 
     Route::post('tearDown', [Controller::class, 'tearDown']);
 
