@@ -22,6 +22,9 @@
       "require": "./dist/laravel-playwright.umd.cjs"
     }
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "vite-plugin-dts": "^4.5.0"
   }

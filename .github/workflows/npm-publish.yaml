@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    name: 'Publish ${{ github.ref_name }}'
+    name: 'Publish to NPM'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
