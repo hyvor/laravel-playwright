@@ -56,3 +56,23 @@ jobs:
 
       -   name: Run phpstan
           run: vendor/bin/phpstan analyse --ansi --no-progress
+
+  playwright_test:
+    name: "Playwright TypeScript"
+    runs-on: ubuntu-latest
+
+    steps:
+      -   name: Checkout
+          uses: actions/checkout@v2
+
+      -   name: Setup Node.js
+          uses: actions/setup-node@v2
+          with:
+            node-version: '16'
+
+      -   name: Install dependencies
+          run: npm install
+
+      -   name: Run TypeScript
+          # build to check for errors
+          run: npm run build

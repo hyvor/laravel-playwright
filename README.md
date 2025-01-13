@@ -101,7 +101,7 @@ test('example', async ({ laravel }) => {
     // output.code: number - The exit code of the command
     // output.output: string - The output of the command
     // with parameters
-    await larael.artisan('db:seed', ['--class', 'DatabaseSeeder']);
+    await laravel.artisan('db:seed', ['--class', 'DatabaseSeeder']);
     
     
     // TRUNCATE TABLES
