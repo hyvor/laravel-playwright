@@ -1,8 +1,13 @@
 name: Publish to NPM
 on:
   workflow_dispatch:
+    inputs:
+      package_version:
+        description: 'Custom package version to publish'
+        required: true
   release:
     types: [published]
+
 jobs:
   publish:
     name: 'Publish ${{ github.ref_name }}'
@@ -10,18 +15,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Determine Version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.package_version }}" != "" ]; then
+            echo "::set-output name=version::${{ inputs.package_version }}"
+          else
+            echo "::set-output name=version::${{ github.ref_name }}"
+          fi
+
       - name: Publish to NPM
         working-directory: playwright
         env:
           NODE_AUTH_TOKEN: ${{ secrets.HYVOR_ORG_NPM_TOKEN }}
-          VERSION: ${{ github.ref_name }}
         run: |
           npm ci
-          npm run package
-          npm version $VERSION --no-git-tag-version
+          npm run build
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
           npm publish --access public
