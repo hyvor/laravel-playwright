@@ -14,7 +14,15 @@ use Carbon\Carbon;
 class DynamicConfig
 {
 
+    /**
+     * Used for time traveling
+     */
     const KEY_TRAVEL = 'app.e2e.travel';
+
+    /**
+     * Used to run a function in the boot method of a service provider
+     */
+    const KEY_BOOT_FUNCTIONS = 'app.e2e.bootFunctions';
 
     public static function getFilePath(): string
     {
@@ -34,6 +42,7 @@ class DynamicConfig
             }
 
             self::loadTime();
+            self::loadBootFunctions();
         }
 
     }
@@ -47,6 +56,22 @@ class DynamicConfig
         $time = Carbon::parse($time);
         \Carbon\Carbon::setTestNow($time);
         \Carbon\CarbonImmutable::setTestNow($time);
+    }
+
+    private static function loadBootFunctions(): void
+    {
+
+        $functions = self::get(self::KEY_BOOT_FUNCTIONS);
+        if (!is_array($functions)) {
+            return;
+        }
+
+        foreach ($functions as $function) {
+            if (is_callable($function)) {
+                $function();
+            }
+        }
+
     }
 
     public static function set(string $key, mixed $value): void

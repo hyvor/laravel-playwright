@@ -47,29 +47,33 @@ export class Laravel {
     }
 
     async artisan(command: string, parameters: string[] = []) {
-        return await this.call('/artisan', {command, parameters});
+        return await this.call<{code: number, output: string}>('/artisan', {command, parameters});
     }
 
     async truncate(connections: (string|null)[] = []) {
         return await this.call('/truncate', {connections});
     }
 
-    async factory(
+    async factory<CountT extends number | undefined = undefined>(
         model: string,
         attrs: any = {},
-        count: number | undefined = undefined
+        count: CountT = undefined as CountT
     ) {
-        return await this.call<Record<string, any> | Record<string, any>[]>('/factory', {model, count, attrs});
+        return await this.call<CountT extends undefined ? Record<string, any> : Record<string, any>[]>('/factory', {model, count, attrs});
     }
 
     async query(
         query: string,
-        bindings: Record<string, any> = {},
-        connection: string | null = null,
-        unprepared: boolean = false
+        bindings: Array<any> = [],
+        options: {
+            connection?: string | null,
+            unprepared?: boolean
+        } = {}
     ) {
 
-        if (unprepared && Object.keys(bindings).length > 0) {
+        const { connection = null, unprepared = false } = options;
+
+        if (unprepared && bindings.length > 0) {
             throw new Error('Cannot use unprepared with bindings');
         }
 
@@ -87,8 +91,12 @@ export class Laravel {
     async select(
         query: string,
         bindings: Record<string, any> = {},
-        connection: string | null = null
+        options: {
+            connection?: string | null,
+            unprepared?: boolean
+        } = {}
     ) {
+        const { connection = null } = options;
         return await this.call<Record<string, any>[]>('/select', {query, bindings, connection});
     }
 
@@ -109,6 +117,10 @@ export class Laravel {
      */
     async travel(to: string) {
         return await this.call('/travel', {to});
+    }
+
+    async registerBootFunction(func: string) {
+        return await this.call('/registerBootFunction', {function: func});
     }
 
     async tearDown() {

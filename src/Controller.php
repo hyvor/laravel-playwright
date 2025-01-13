@@ -180,6 +180,28 @@ class Controller
         return Response::json();
     }
 
+    public function registerBootFunction(Request $request) : JsonResponse
+    {
+
+        $request->validate([
+            'function' => 'string|required',
+        ]);
+
+        $function = (string) $request->string('function');
+
+        if (!is_callable($function))
+            abort(422, 'Function is not callable');
+
+        $currentBootFunctions = DynamicConfig::get(DynamicConfig::KEY_BOOT_FUNCTIONS, []);
+        assert(is_array($currentBootFunctions));
+        $currentBootFunctions[] = $function;
+
+        DynamicConfig::set(DynamicConfig::KEY_BOOT_FUNCTIONS, $currentBootFunctions);
+
+        return Response::json();
+
+    }
+
     public function travel(Request $request, DynamicConfig $dynamicConfig) : JsonResponse
     {
 
