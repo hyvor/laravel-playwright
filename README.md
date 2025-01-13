@@ -1,25 +1,18 @@
 # Laravel Playwright
 
-This package contains a Laravel library and a Typescript library to help you write E2E tests for your Laravel application using [Playwright](https://playwright.dev/).
+This repository contains a Laravel library and a Typescript library to help you write E2E tests for your Laravel application using [Playwright](https://playwright.dev/). It provides a set of endpoints to interact with your Laravel application from your Playwright tests. For example, you can run artisan commands, create models using factories, run database queries, and call PHP functions from your Playwright tests.
 
-It adds the following endpoints to your application in `local` and `testing` environments:
+## Laravel
 
-* `POST /playwright/artisan` - Run an artisan command
-* `POST /playwright/truncate` - Truncate all tables
-* `POST /playwright/factory` - Create a model using factories
-* `POST /playwright/query` - Run a database query
-* `POST /playwright/select` - Run a database select query
-* `POST /playwright/function` - Call a PHP function (or static class method)
+### Installation
 
-## Installation
-
-You can install the package via composer:
+You can install the Laravel package via composer:
 
 ```bash
-composer require --dev hyvor/laravel-e2e
+composer require --dev hyvor/laravel-playwright
 ```
 
-## Configuration
+### Configuration
 
 You can configure the package by adding an `e2e` key to your `config/app.php` file. The following options are available (default values are shown):
 
@@ -29,7 +22,8 @@ return [
 
     'e2e' => [
         /**
-        * The prefix for the testing endpoints
+        * The prefix for the testing endpoints that are used to interact with Playwright
+        * Make sure to change `use.laravelBaseUrl` in playwright.config.ts if you change this
         */
         'prefix' => 'playwright',
         
@@ -40,6 +34,8 @@ return [
     ],
 ];
 ```
+
+## Playwright
 
 ## Usage
 

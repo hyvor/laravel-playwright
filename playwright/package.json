@@ -15,5 +15,15 @@
   },
   "peerDependencies": {
     "@playwright/test": "^1.49.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/laravel-playwright.js",
+      "require": "./dist/laravel-playwright.umd.cjs"
+    }
+  },
+  "dependencies": {
+    "vite-plugin-dts": "^4.5.0"
   }
 }

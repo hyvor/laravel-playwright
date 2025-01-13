@@ -16,9 +16,9 @@ export const test = playwrightTest.extend<LaravelFixtures & LaravelOptions>({
 
     laravelBaseUrl: [undefined, {option: true}],
 
-    laravel: async (props, use) => {
-        const baseUrl = props.laravelBaseUrl || props.baseURL + '/playwright'
-        const laravel = new Laravel(baseUrl, props.request);
+    laravel: async ({ laravelBaseUrl, baseURL, request }, use) => {
+        const baseUrl = laravelBaseUrl || baseURL + '/playwright'
+        const laravel = new Laravel(baseUrl, request);
         await use(laravel);
         await laravel.tearDown();
     }
@@ -32,9 +32,9 @@ export class Laravel {
         private request: APIRequestContext
     ) {}
 
-    async call<T extends {}>(endpoint: string, data: any = null) : Promise<T> {
+    async call<T extends any>(endpoint: string, data: object = {}) : Promise<T> {
         const url = this.baseUrl.replace(/\/$/, '') + endpoint;
-        const response = await this.request.post(url, data);
+        const response = await this.request.post(url, {data});
         if (response.status() !== 200) {
             throw new Error(`
                 Failed to call Laravel ${endpoint}. 
@@ -92,8 +92,8 @@ export class Laravel {
         return await this.call<Record<string, any>[]>('/select', {query, bindings, connection});
     }
 
-    async callFunction(func: string, parameters: any[]|Record<string, any> = []) {
-        return await this.call<any>('/function', {func, parameters});
+    async callFunction<T extends any>(func: string, args: any[]|Record<string, any> = []) {
+        return await this.call<T>('/function', {function: func, args});
     }
 
     /**
