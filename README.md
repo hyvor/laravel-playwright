@@ -109,6 +109,9 @@ test('example', async ({ laravel }) => {
     await laravel.truncate();
     // in specific DB connections
     await laravel.truncate(['connection1', 'connection2']);
+    // keep some tables (truncate everything else)
+    // useful to preserve a seeded baseline like reference/lookup tables
+    await laravel.truncate([], { except: ['countries', 'roles'] });
     
     
     // CREATE MODELS FROM FACTORIES

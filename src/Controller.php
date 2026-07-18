@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Schema;
 
 class Controller
 {
@@ -35,14 +36,30 @@ class Controller
 
         $request->validate([
             'connections' => 'nullable|array',
-            'connections.*' => 'nullable|string'
+            'connections.*' => 'nullable|string',
+            'except' => 'nullable|array',
+            'except.*' => 'string',
         ]);
 
         /** @var array<string|null> $connections */
         $connections = $request->input('connections') ?? [null];
+        /** @var string[]|null $except */
+        $except = $request->input('except');
+
+        if ($except !== null) {
+            foreach ($connections as $connection) {
+                /** @var string[] $tables */
+                $tables = Schema::connection($connection)->getTableListing();
+                $unknown = array_diff($except, $tables);
+
+                if (count($unknown) > 0) {
+                    abort(422, 'Unknown table(s): ' . implode(', ', $unknown));
+                }
+            }
+        }
 
         $truncate = new Services\Truncate();
-        $truncate->truncate($connections);
+        $truncate->truncate($connections, $except);
 
         return Response::json();
 

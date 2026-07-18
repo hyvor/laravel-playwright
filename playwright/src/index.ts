@@ -50,8 +50,14 @@ export class Laravel {
         return await this.call<{code: number, output: string}>('/artisan', {command, parameters});
     }
 
-    async truncate(connections: (string|null)[] = []) {
-        return await this.call('/truncate', {connections});
+    async truncate(
+        connections: (string|null)[] = [],
+        options: {
+            except?: string[]
+        } = {}
+    ) {
+        const { except } = options;
+        return await this.call('/truncate', {connections, except});
     }
 
     async factory<CountT extends number | undefined = undefined>(
