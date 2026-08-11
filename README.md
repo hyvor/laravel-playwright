@@ -1,3 +1,5 @@
+> This package is no longer maintained since 2026-08-11. Feel free to fork it. Contact us at foss@hyvor.com if you want to link to your fork from this README.
+
 # Laravel Playwright
 
 This repository contains a Laravel and a Playwright library to help you write E2E tests for your Laravel application using [Playwright](https://playwright.dev/). It adds a set of endpoints to your Laravel application to allow Playwright to interact with it. You can do the following from your Playwright tests:
