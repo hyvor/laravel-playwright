@@ -10,21 +10,30 @@ class Truncate
 
     /**
      * @param array<null | string> $connections
+     * @param string[]|null $except Tables to keep (truncate everything else)
      */
-    public function truncate(array $connections = [null]) : void
+    public function truncate(array $connections = [null], ?array $except = null) : void
     {
 
         foreach ($connections as $connection) {
-            $this->truncateTablesOfConnection($connection);
+            $this->truncateTablesOfConnection($connection, $except);
         }
 
     }
 
-    private function truncateTablesOfConnection(?string $connection) : void
+    /**
+     * @param string[]|null $except
+     */
+    private function truncateTablesOfConnection(?string $connection, ?array $except) : void
     {
 
         /** @var string[] $tables */
         $tables = Schema::connection($connection)->getTableListing();
+
+        if ($except !== null) {
+            $tables = array_values(array_diff($tables, $except));
+        }
+
         Schema::disableForeignKeyConstraints();
 
         foreach ($tables as $table) {
