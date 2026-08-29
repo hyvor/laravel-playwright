@@ -19,7 +19,7 @@ class Controller
     {
 
         $command = (string) $request->string('command');
-        $parameters = (array) $request->input('parameters');
+        $parameters = $this->parseArtisanParameters((array) $request->input('parameters', []));
 
         $exitCode = Artisan::call($command, $parameters);
 
@@ -28,6 +28,59 @@ class Controller
             'output' => Artisan::output(),
         ]);
 
+    }
+
+    /**
+     * Parse CLI-style parameters into the format expected by Artisan::call().
+     *
+     * Converts:
+     *   ['--option=value', '--flag', 'argument']
+     * Into:
+     *   ['--option' => 'value', '--flag' => true, 'argument']
+     *
+     * Also supports associative arrays passed directly (for backwards compatibility).
+     *
+     * @param array<int|string, mixed> $parameters
+     * @return array<int|string, mixed>
+     */
+    private function parseArtisanParameters(array $parameters): array
+    {
+        $parsed = [];
+
+        foreach ($parameters as $key => $value) {
+            // Already an associative array entry (e.g., ['--option' => 'value'])
+            if (is_string($key)) {
+                $parsed[$key] = $value;
+                continue;
+            }
+
+            // CLI-style string parameter
+            if (is_string($value)) {
+                // Option with value: --option=value
+                if (str_starts_with($value, '--') && str_contains($value, '=')) {
+                    [$option, $optValue] = explode('=', $value, 2);
+                    $parsed[$option] = $optValue;
+                }
+                // Short option with value: -o=value
+                elseif (str_starts_with($value, '-') && !str_starts_with($value, '--') && str_contains($value, '=')) {
+                    [$option, $optValue] = explode('=', $value, 2);
+                    $parsed[$option] = $optValue;
+                }
+                // Flag (boolean option): --flag or -f
+                elseif (str_starts_with($value, '-')) {
+                    $parsed[$value] = true;
+                }
+                // Positional argument
+                else {
+                    $parsed[] = $value;
+                }
+            } else {
+                // Non-string value, keep as-is
+                $parsed[$key] = $value;
+            }
+        }
+
+        return $parsed;
     }
 
     public function truncate(Request $request) : JsonResponse

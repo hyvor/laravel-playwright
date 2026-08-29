@@ -46,7 +46,10 @@ export class Laravel {
         return await response.json();
     }
 
-    async artisan(command: string, parameters: string[] = []) {
+    async artisan(
+        command: string,
+        parameters: string[] | Record<string, string | boolean | number> = []
+    ) {
         return await this.call<{code: number, output: string}>('/artisan', {command, parameters});
     }
 
