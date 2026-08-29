@@ -17,8 +17,8 @@
     <server name="APP_ENV" value="testing"/>
     <server name="APP_DEBUG" value="true"/>
     <server name="DB_CONNECTION" value="pgsql"/>
-    <server name="DB_HOST" value="localhost"/>
-    <server name="DB_PORT" value="8989"/>
+    <server name="DB_HOST" value="172.17.0.1"/>
+    <server name="DB_PORT" value="9876"/>
     <server name="DB_DATABASE" value="postgres"/>
     <server name="DB_USERNAME" value="postgres"/>
     <server name="DB_PASSWORD" value="postgres"/>

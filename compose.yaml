@@ -1,7 +1,17 @@
-# Use postgres/example user/password credentials
-version: '3.9'
-
 services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.4}
+    restart: always
+    tty: true
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
 
   db:
     image: postgres
@@ -11,4 +21,4 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-        - "8989:5432"
+      - 9876:5432

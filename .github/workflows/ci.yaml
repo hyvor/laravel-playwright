@@ -17,24 +17,17 @@ jobs:
 
     steps:
       -   name: Checkout
-          uses: actions/checkout@v2
-
-      -   name: Setup PHP
-          uses: shivammathur/setup-php@v2
-          with:
-            coverage: "none"
-            php-version: "${{ matrix.php }}"
-            ini-file: development
-            tools: composer:v2
+          uses: actions/checkout@v4
 
       -   name: Docker compose
-          run: docker compose up -d
-
-      -   name: Install dependencies
-          run: composer update --ansi --no-progress
+          env:
+            PHP_VERSION: ${{ matrix.php }}
+          run: |
+            docker compose up -d --wait --build
+            sleep 10
 
       -   name: Run tests
-          run: vendor/bin/phpunit
+          run: docker compose exec app vendor/bin/phpunit
 
   static_analysis:
     name: Static analysis
@@ -42,20 +35,13 @@ jobs:
 
     steps:
       -   name: Checkout
-          uses: actions/checkout@v2
+          uses: actions/checkout@v4
 
-      -   name: Setup PHP
-          uses: shivammathur/setup-php@v2
-          with:
-            coverage: "none"
-            php-version: "8.3"
-            ini-file: development
+      -   name: Build
+          run: docker build -t app .
 
-      -   name: Install dependencies
-          run: composer update --ansi --no-progress
-
-      -   name: Run phpstan
-          run: vendor/bin/phpstan analyse --ansi --no-progress
+      -   name: Run static analysis
+          run: docker run app vendor/bin/phpstan analyse --memory-limit=1G
 
   playwright_test:
     name: "Playwright TypeScript"

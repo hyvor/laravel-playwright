@@ -24,21 +24,16 @@
         "php": ">=8.2"
     },
     "require-dev": {
-        "orchestra/testbench": "^9.0",
+        "orchestra/testbench": "^10.0",
         "phpstan/phpstan": "^2.0",
         "larastan/larastan": "^3.0",
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^11.5"
     },
     "extra": {
         "laravel": {
             "providers": [
                 "Hyvor\\LaravelPlaywright\\ServiceProvider"
             ]
-        }
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
         }
     }
 }

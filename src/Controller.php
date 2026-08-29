@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Symfony\Component\Console\Input\ArrayInput;
 
 class Controller
 {
@@ -21,11 +21,21 @@ class Controller
         $command = (string) $request->string('command');
         $parameters = (array) $request->input('parameters');
 
-        $exitCode = Artisan::call($command, $parameters);
+        $output = null;
+        $exitCode = null;
+
+        $input = new ArrayInput($parameters);
+        $args = $input->__toString();
+        $basePath = base_path();
+        $finalCommand = "cd $basePath && php artisan $command $args";
+        exec($finalCommand, $output, $exitCode);
+
+        $output = implode("\n", $output);
 
         return Response::json([
             'code' => $exitCode,
-            'output' => Artisan::output(),
+            'output' => $output,
+            'command' => $finalCommand
         ]);
 
     }
